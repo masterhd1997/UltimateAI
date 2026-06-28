@@ -1,6 +1,6 @@
 {
-  "version": "0.1.0",
-  "download_url": "",
-  "sha256": "",
-  "notes": "Initial release."
+  "sha256": "89cc17c6b13fc5661f6b2d29ab64e9387a96174315b27fce8e7acb3f14b6d42d",
+  "notes": "GameCutAI 1.0.0",
+  "download_url": "https://github.com/masterhd1997/UltimateAI/releases/download/v1.0.0/GameCutAI-1.0.0.exe",
+  "version": "1.0.0"
 }
