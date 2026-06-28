@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GameCut AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/editor.css" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <!-- Setup overlay - shown if FFmpeg or other required components are missing -->
+  <div class="setup-overlay" id="setupOverlay">
+    <div class="setup-card">
+      <div class="setup-icon">*</div>
+      <h2>Almost ready</h2>
+      <p class="setup-sub">Install missing components to unlock full AI editing</p>
+      <ul class="setup-list" id="setupList"></ul>
+      <button class="btn primary" id="btnSetupDismiss">Check again</button>
+    </div>
+  </div>
+
+  <!-- Processing overlay -->
+  <div class="process-overlay" id="processOverlay" hidden>
+    <div class="process-card">
+      <div class="spinner"></div>
+      <h3 id="processTitle">AI is editing your video</h3>
+      <p id="processSub">Analyzing footage...</p>
+      <div class="pipeline-steps" id="pipelineSteps">
+        <div class="step" data-step="analyze"><span>1</span> Watch video</div>
+        <div class="step" data-step="transcribe"><span>2</span> Listen to audio</div>
+        <div class="step" data-step="research"><span>3</span> YouTube research</div>
+        <div class="step" data-step="plan"><span>4</span> AI edit plan</div>
+        <div class="step" data-step="render"><span>5</span> Render</div>
+      </div>
+      <div class="progress-bar lg"><div class="progress-fill" id="overlayProgress"></div></div>
+    </div>
+  </div>
+
+  <div class="update-overlay" id="updateOverlay" hidden>
+    <div class="update-card">
+      <h3 id="updateTitle">Update available</h3>
+      <p id="updateSub">A newer version is ready to download.</p>
+      <div class="update-notes" id="updateNotes"></div>
+      <div class="update-progress" id="updateProgress" hidden>
+        <div class="progress-bar"><div class="progress-fill" id="updateFill"></div></div>
+        <span id="updateText">Downloading update...</span>
+      </div>
+      <div class="update-actions">
+        <button class="btn primary" id="btnDownloadUpdate">Download update</button>
+        <button class="btn ghost" id="btnUpdateClose">Later</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toastStack"></div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="logo">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="8" fill="url(#g)"/><path d="M8 9l10 5-10 5V9z" fill="#fff"/><defs><linearGradient id="g" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#7c5cff"/><stop offset="1" stop-color="#00d4aa"/></linearGradient></defs></svg>
+          GameCut <span>AI</span>
+        </div>
+        <div class="status-pill" id="statusPill">
+          <span class="dot"></span> Checking...
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn ghost" id="btnUpdate">Check Updates</button>
+        <button class="btn ghost" id="btnCompare" disabled>Before / After</button>
+        <button class="btn accent" id="btnExport" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Export
+        </button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="panel left">
+        <section class="panel-section">
+          <h3>Import footage</h3>
+          <div class="drop-zone" id="dropZone">
+            <div class="drop-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            </div>
+            <p class="drop-title">Drop video here</p>
+            <span class="drop-sub">MP4 - MOV - MKV - WEBM - AVI - M4V</span>
+            <input type="file" id="fileInput" accept="video/*" hidden />
+          </div>
+          <div class="upload-progress" id="uploadProgress" hidden>
+            <div class="progress-bar"><div class="progress-fill" id="uploadFill"></div></div>
+            <span id="uploadText">Uploading...</span>
+          </div>
+        </section>
+
+        <section class="panel-section recent-projects" id="recentProjectsSection" hidden>
+          <h3>Recent projects</h3>
+          <div class="recent-list" id="recentProjects"></div>
+        </section>
+
+        <section class="panel-section">
+          <h3>Game & style</h3>
+          <div class="field">
+            <label>Game name</label>
+            <input type="text" id="gameName" placeholder="Fortnite, Valorant, Minecraft..." />
+          </div>
+          <div class="style-grid" id="styleGrid">
+            <button class="style-chip active" data-style="hype">Hype</button>
+            <button class="style-chip" data-style="cinematic">Cinematic</button>
+            <button class="style-chip" data-style="funny">Funny</button>
+            <button class="style-chip" data-style="tutorial">Tutorial</button>
+            <button class="style-chip" data-style="horror">Horror</button>
+            <button class="style-chip" data-style="greenscreen">Green Screen</button>
+            <button class="style-chip" data-style="vintage">Vintage</button>
+            <button class="style-chip" data-style="neon">Neon</button>
+            <button class="style-chip" data-style="blur">Blur</button>
+          </div>
+          <div class="field">
+            <label>Target length (seconds)</label>
+            <input type="range" id="targetDuration" min="15" max="7200" value="60" />
+            <input type="number" id="targetDurationInput" min="15" max="86400" value="60" style="width: 80px; margin-left: 10px;" />
+            <span class="range-val" id="durationVal">60s</span>
+          </div>
+        </section>
+
+        <section class="panel-section">
+          <h3>Audience (optional)</h3>
+          <p class="audience-hint">Who watches this kind of content?</p>
+          <div class="creator-grid" id="creatorGrid">
+            <button class="creator-chip" data-creator="Shroud">Shroud</button>
+            <button class="creator-chip" data-creator="Markiplier">Markiplier</button>
+            <button class="creator-chip" data-creator="GrayStillPlays">GrayStillPlays</button>
+            <button class="creator-chip" data-creator="Drae">Drae</button>
+            <button class="creator-chip" data-creator="CoryxKenshin">CoryxKenshin</button>
+            <button class="creator-chip" data-creator="IGP">IGP</button>
+            <button class="creator-chip" data-creator="NoahJ456">NoahJ456</button>
+            <button class="creator-chip" data-creator="TenZ">TenZ</button>
+          </div>
+        </section>
+
+        <section class="panel-section">
+          <h3>AI options</h3>
+          <label class="toggle"><input type="checkbox" id="addSubtitles" checked /><span class="toggle-ui"></span> Auto subtitles</label>
+          <label class="toggle"><input type="checkbox" id="addEffects" checked /><span class="toggle-ui"></span> Effects & transitions</label>
+          <label class="toggle"><input type="checkbox" id="useWhisper" /><span class="toggle-ui"></span> Whisper speech-to-text</label>
+          <label class="toggle"><input type="checkbox" id="removeSilence" /><span class="toggle-ui"></span> Auto-remove silence</label>
+          <label class="toggle"><input type="checkbox" id="removeFillers" /><span class="toggle-ui"></span> Remove filler words</label>
+          <label class="toggle"><input type="checkbox" id="jumpCuts" /><span class="toggle-ui"></span> Auto jump cuts</label>
+        </section>
+
+        <section class="panel-section">
+          <h3>Export settings</h3>
+          <div class="field">
+            <label>Platform preset</label>
+            <select id="exportPlatform">
+              <option value="youtube">YouTube (16:9)</option>
+              <option value="tiktok">TikTok (9:16)</option>
+              <option value="instagram">Instagram (1:1)</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Resolution</label>
+            <select id="exportResolution">
+              <option value="1080p">1080p (1920x1080)</option>
+              <option value="720p">720p (1280x720)</option>
+              <option value="480p">480p (854x480)</option>
+              <option value="4k">4K (3840x2160)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Frame rate</label>
+            <select id="exportFps">
+              <option value="30">30 fps</option>
+              <option value="60">60 fps</option>
+              <option value="24">24 fps</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Aspect ratio</label>
+            <select id="exportAspectRatio">
+              <option value="16:9">16:9 (YouTube)</option>
+              <option value="9:16">9:16 (TikTok)</option>
+              <option value="1:1">1:1 (Instagram)</option>
+              <option value="4:3">4:3</option>
+            </select>
+          </div>
+        </section>
+
+        <button id="btnAiEdit" class="btn ai" disabled>
+          <span class="btn-shine"></span>
+          AI Edit My Video
+        </button>
+      </aside>
+
+      <main class="center">
+        <div class="preview-wrap">
+          <div class="preview-frame">
+            <video id="preview" controls playsinline></video>
+            <div class="preview-placeholder" id="placeholder">
+              <div class="ph-ring"><div class="ph-icon">Play</div></div>
+              <p>Upload gameplay to begin</p>
+              <span>AI will cut, effect & subtitle it for you</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-bar">
+          <div class="timeline-header">
+            <span>Timeline</span>
+            <span class="timeline-meta" id="timelineMeta">No clips yet</span>
+          </div>
+          <div class="timeline-toolbar">
+            <button id="btnSplit" class="tool-btn" title="Split clip at playhead">Split</button>
+            <button id="btnDeleteLeft" class="tool-btn" title="Delete left of playhead">Delete Left</button>
+            <button id="btnDeleteRight" class="tool-btn" title="Delete right of playhead">Delete Right</button>
+            <button id="btnDelete" class="tool-btn" title="Delete selected clip">Delete</button>
+            <button id="btnReverse" class="tool-btn" title="Reverse clip">Reverse</button>
+            <button id="btnSpeed" class="tool-btn" title="Speed control">Speed</button>
+          </div>
+          <div class="timeline-ruler" id="timelineRuler"></div>
+          <div class="timeline-scroll">
+            <div class="timeline-track" id="timelineTrack"></div>
+          </div>
+        </div>
+      </main>
+
+      <aside class="panel right">
+        <h3>AI Assistant</h3>
+        <div class="ai-log" id="aiLog">
+          <div class="ai-msg system animate-in">
+            Upload your clip, pick your game, hit <strong>AI Edit</strong> - I will build an edit automatically.
+          </div>
+        </div>
+
+        <div class="research" id="researchPanel" hidden>
+          <h4>Creator research</h4>
+          <div id="researchList"></div>
+        </div>
+
+        <div class="stats-row" id="statsRow" hidden>
+          <div class="stat"><span id="statClips">0</span><label>Clips</label></div>
+          <div class="stat"><span id="statDuration">0s</span><label>Length</label></div>
+          <div class="stat"><span id="statEffects">0</span><label>Effects</label></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>

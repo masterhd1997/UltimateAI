@@ -1,0 +1,31 @@
+{
+  "assets": [
+    {
+      "id": "punch-zoom",
+      "type": "effect",
+      "path": "",
+      "genres": ["general", "fps", "racing"],
+      "styles": ["hype", "funny"],
+      "license": "built-in",
+      "description": "Metadata entry for punch zoom render effect."
+    },
+    {
+      "id": "suspense-hold",
+      "type": "effect",
+      "path": "",
+      "genres": ["horror", "survival"],
+      "styles": ["horror", "cinematic"],
+      "license": "built-in",
+      "description": "Metadata entry for suspense pacing and fade treatment."
+    },
+    {
+      "id": "reaction-caption",
+      "type": "caption",
+      "path": "",
+      "genres": ["funny", "simulator", "sandbox"],
+      "styles": ["funny"],
+      "license": "built-in",
+      "description": "Metadata entry for reaction caption templates."
+    }
+  ]
+}

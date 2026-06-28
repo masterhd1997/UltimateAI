@@ -1,0 +1,80 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260625044803
+Username: DESKTOP-LQR87U4\Landon Posuk
+RunAs User: DESKTOP-LQR87U4\Landon Posuk
+Configuration Name: 
+Machine: DESKTOP-LQR87U4 (Microsoft Windows NT 10.0.26200.0)
+Host Application: PowerShell.exe -noexit -WorkingDirectory C:\Users\Landon Posuk\UltimateAI
+Process ID: 4464
+PSVersion: 5.1.26100.8737
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.8737
+BuildVersion: 10.0.26100.8737
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\Users\Landon Posuk\UltimateAI\build_error_log.txt
+PS C:\Users\Landon Posuk\UltimateAI>
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) Write-Host "========================================================" -ForegroundColor Cyan
+========================================================
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) Write-Host "   GameCut AI Pro - Hard Target Environment Repairer   " -ForegroundColor Cyan
+   GameCut AI Pro - Hard Target Environment Repairer
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) Write-Host "========================================================" -ForegroundColor Cyan
+========================================================
+PS C:\Users\Landon Posuk\UltimateAI>
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) # 2. Kill all stuck background processes to release file locks
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) Write-Host "[1/4] Purging stuck file handles..." -ForegroundColor Cyan
+[1/4] Purging stuck file handles...
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) Stop-Process -Name "gui", "python", "ffmpeg", "ffprobe" -Force -ErrorAction SilentlyContinue
+PS C:\Users\Landon Posuk\UltimateAI>
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) # 3. FORCE installation of OpenCV explicitly using your exact Miniconda engine binary path
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) Write-Host "[2/4] Injecting OpenCV (cv2) directly into Miniconda environment..." -ForegroundColor Cyan
+[2/4] Injecting OpenCV (cv2) directly into Miniconda environment...
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) & "C:\ml-pytorch\Miniconda3\python.exe" -m pip install --upgrade --force-reinstall opencv-python
+
+PS C:\Users\Landon Posuk\UltimateAI>
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) # 4. Verify the installation succeeded inside Miniconda before compiling
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) Write-Host "[3/4] Verifying Miniconda module path attributes..." -ForegroundColor Cyan
+[3/4] Verifying Miniconda module path attributes...
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) $Verify = & "C:\ml-pytorch\Miniconda3\python.exe" -c "import cv2; print('VERIFIED: OpenCV is fully responsive. Version: ' + cv2.__version__)" 2>&1
+PS C:\Users\Landon Posuk\UltimateAI>
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) if ($Verify -like "*ModuleNotFoundError*") {
+    Write-Host "[!] CRITICAL: Miniconda installation bypassed. Logging fault attributes." -ForegroundColor Red
+} else {
+    Write-Host "[$Verify]" -ForegroundColor Green
+}
+[VERIFIED: OpenCV is fully responsive. Version: 4.13.0]
+PS C:\Users\Landon Posuk\UltimateAI>
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) # 5. Compile the standalone workspace binary container with complete module hooks
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) Write-Host "[4/4] Initiating production compilation pass..." -ForegroundColor Cyan
+[4/4] Initiating production compilation pass...
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) pyinstaller --clean --onefile --collect-all uvicorn --collect-all fastapi --collect-all aiofiles --collect-all cv2 --add-data "backend;backend" --add-data "frontend;frontend" gui.py
+
+PS C:\Users\Landon Posuk\UltimateAI>
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) # Stop logging text output to the file
+PS C:\Users\Landon Posuk\UltimateAI>
+(base) Stop-Transcript
+**********************
+Windows PowerShell transcript end
+End time: 20260625044838
+**********************

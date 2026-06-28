@@ -1,0 +1,121 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"   # triggers on v0.1.0, v1.2.3, etc.
+
+permissions:
+  contents: write   # needed to create GitHub Releases and upload assets
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────────
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # ── Python ──────────────────────────────────────────────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      # ── Dependencies ─────────────────────────────────────────────────
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt pyinstaller
+
+      # ── Extract version from git tag ─────────────────────────────────
+      - name: Derive version from tag
+        id: version
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"          # e.g. v0.1.1
+          VERSION="${TAG#v}"                # strip leading v → 0.1.1
+          echo "tag=$TAG"       >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      # ── Build .exe with PyInstaller ──────────────────────────────────
+      - name: Build GameCutAI.exe
+        env:
+          GAMECUT_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          pyinstaller gui.spec --noconfirm
+
+      # ── Compute SHA-256 of the installer ────────────────────────────
+      - name: Compute SHA-256
+        id: sha256
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash "dist\GameCutAI.exe" -Algorithm SHA256).Hash.ToLower()
+          echo "hash=$hash" >> $env:GITHUB_OUTPUT
+          Write-Host "SHA256: $hash"
+
+      # ── Write the update manifest ────────────────────────────────────
+      - name: Write release manifest
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $repo    = "${{ github.repository }}"
+          $tag     = "${{ steps.version.outputs.tag }}"
+          $hash    = "${{ steps.sha256.outputs.hash }}"
+
+          # The download URL GitHub gives to release assets
+          $url = "https://github.com/$repo/releases/download/$tag/GameCutAI-$version.exe"
+
+          # Read release notes from CHANGELOG or use the tag annotation
+          $notes = "GameCutAI $version"
+
+          $manifest = @{
+            version      = $version
+            download_url = $url
+            sha256       = $hash
+            notes        = $notes
+          } | ConvertTo-Json -Depth 2
+
+          $manifest | Out-File -FilePath "dist\latest.json" -Encoding utf8NoBOM
+          Write-Host $manifest
+
+      # ── Copy update_config.json into dist ───────────────────────────
+      - name: Stage update_config.json
+        shell: pwsh
+        run: |
+          $repo = "${{ github.repository }}"
+          $config = @{ manifest_url = "https://raw.githubusercontent.com/$repo/main/latest.json" } | ConvertTo-Json
+          $config | Out-File -FilePath "dist\update_config.json" -Encoding utf8NoBOM
+
+      # ── Rename installer to versioned name ───────────────────────────
+      - name: Rename installer
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          Rename-Item "dist\GameCutAI.exe" "GameCutAI-$version.exe"
+
+      # ── Create GitHub Release and upload assets ──────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "GameCutAI ${{ steps.version.outputs.version }}"
+          draft: false
+          prerelease: false
+          files: |
+            dist/GameCutAI-${{ steps.version.outputs.version }}.exe
+            dist/latest.json
+            dist/update_config.json
+          generate_release_notes: true
+
+      # ── Commit latest.json to main so the manifest URL always resolves
+      - name: Commit latest.json to repo
+        shell: bash
+        run: |
+          cp dist/latest.json latest.json
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add latest.json
+          git diff --cached --quiet || git commit -m "chore: update manifest to ${{ steps.version.outputs.version }} [skip ci]"
+          git push origin HEAD:main

@@ -1,0 +1,6 @@
+{
+  "_comment": "Copy to update_config.json and set manifest_url to your hosted latest.json.",
+  "_comment2": "GitHub example: https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/latest.json",
+  "_comment3": "The publish_release.py script fills this in automatically once a GitHub remote exists.",
+  "manifest_url": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/latest.json"
+}

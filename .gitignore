@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment
+.env
+*.env.local
+
+# PyInstaller
+*.spec.bak
+dist/
+build/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# App data written at runtime
+data/uploads/*
+data/exports/*
+data/temp/*
+uploads/*
+test_output.mp4
+
+# Secrets / keys
+*.pem
+*.key
+secrets.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# VS Code
+.vscode/settings.json
+.vscode/launch.json
+
+# Node (if any tooling added later)
+node_modules/
