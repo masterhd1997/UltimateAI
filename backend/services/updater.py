@@ -15,7 +15,7 @@ try:
 except ImportError:
     from services.dependencies import get_app_data_dir
 
-APP_VERSION = os.environ.get("GAMECUT_VERSION", "1.0.0")
+APP_VERSION = os.environ.get("GAMECUT_VERSION", "0.1.0")
 CONFIG_FILE_NAME = "update_config.json"
 
 

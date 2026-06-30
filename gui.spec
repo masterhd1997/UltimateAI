@@ -5,7 +5,7 @@ import os
 # Version is injected by the CI pipeline via GAMECUT_VERSION env var.
 # Locally: set GAMECUT_VERSION=0.1.1 before running pyinstaller.
 # Falls back to reading from latest.json if the env var isn't set.
-_app_version = os.environ.get("GAMECUT_VERSION", "1.0.0")
+_app_version = os.environ.get("GAMECUT_VERSION", "0.1.0")
 
 datas = [
     ('frontend', 'frontend'),
